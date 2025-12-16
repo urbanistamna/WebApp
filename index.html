@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Trees Map</title>
+    <link rel="icon" type="image/x-icon" href="https://cdn-icons-png.flaticon.com/512/756/756432.png">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css">
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js" ></script>
+    <style>
+    #map{
+        height: 100vh;
+        width: 100vw;
+    }
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+    
+	
+<script>
+// Define a basemap
+const OpenStreetMap_Mapnik = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+	maxZoom: 19,
+	attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+});
+// Create a map object with the basemap, center and zoom.
+const map = L.map('map',{
+    layers: OpenStreetMap_Mapnik,
+    center: [ 49, 17 ],
+    zoom: 6,
+});
+
+// Define variable for later use.
+let trees;
+let appsscriptUrl = "https://script.google.com/macros/s/AKfycbxSJ7u_AxlpFeUdPKb9q9F05IjgGum3706NHwornBNzbXCu3LAp_tZowYM3BOQVH2Z0Aw/exec"
+       
+
+
+function reloadLayer(){
+    // Perform a HTTP GET request, which should return our GeoJson.
+    fetch(appsscriptUrl)
+    .then(response => response.json())
+    .then(data => {
+        // If the map has the trees layer, remove it.
+        if(map.hasLayer(trees)){
+            map.removeLayer(trees)
+        }
+        // Redefine the trees layer, and add to the map.
+        trees = L.geoJson(data,{
+            onEachFeature: function(feature, layer){
+                if (feature.properties && feature.properties.type) {
+                    layer.bindPopup("Tree Type: " +feature.properties.type);
+                }
+            }
+        })
+        map.addLayer(trees)
+    }) 
+}
+
+
+// Load the layer for the first time
+reloadLayer()
+
+
+
+</script>
+    
+</body>
+</html>
